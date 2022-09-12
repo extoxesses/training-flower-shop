@@ -9,6 +9,11 @@ public class OrderDetails implements Serializable {
     private int amount;
     private String flowerCode;
 
+    public OrderDetails(int amount, String flowerCode) {
+        this.amount = amount;
+        this.flowerCode = flowerCode;
+    }
+
     public int getAmount() {
         return amount;
     }

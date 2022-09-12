@@ -1,7 +1,6 @@
 package com.extoxesses.flowershop.controllers;
 
 import com.extoxesses.flowershop.constants.PathConstants;
-import com.extoxesses.flowershop.dto.Order;
 import com.extoxesses.flowershop.dto.OrderResponse;
 import com.extoxesses.flowershop.entities.Flower;
 import com.extoxesses.flowershop.services.FlowerShopService;
@@ -29,8 +28,8 @@ public class FlowerShopController {
     }
 
     @PostMapping
-    public ResponseEntity<List<OrderResponse>> makeOrder(@RequestBody Order order) {
-        List<OrderResponse> response = shopService.makeOrder(order);
+    public ResponseEntity<List<OrderResponse>> makeOrder(@RequestBody List<String> order) {
+        List<OrderResponse> response = shopService.makeOrder(order, true);
         return ResponseEntity.ok(response);
     }
 

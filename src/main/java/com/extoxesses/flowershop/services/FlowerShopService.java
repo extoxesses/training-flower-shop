@@ -1,12 +1,12 @@
 package com.extoxesses.flowershop.services;
 
-import com.extoxesses.flowershop.dto.Order;
 import com.extoxesses.flowershop.dto.OrderDetails;
 import com.extoxesses.flowershop.dto.OrderResponse;
 import com.extoxesses.flowershop.dto.OrderResponseDetails;
 import com.extoxesses.flowershop.entities.Bundle;
 import com.extoxesses.flowershop.entities.Flower;
 import com.extoxesses.flowershop.repositories.FlowerRepository;
+import com.extoxesses.flowershop.utility.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -26,17 +26,28 @@ public class FlowerShopService {
     @Autowired
     private FlowerRepository flowerRepository;
 
+    /**
+     * Method to retrieve all flower from the database.
+     * In the exercise scope, it was created mainly for debug purposes.
+     *
+     * @return the list of all flowers (with their bundles)
+     */
     public List<Flower> findAll() {
         return flowerRepository.findAll();
     }
 
-    public List<Flower> findByCodesIn(List<String> flowerCodes) {
-        return flowerRepository.findAllByCodeIn(flowerCodes);
-    }
-
-    public List<OrderResponse> makeOrder(Order order) {
+    /**
+     * Method that implements the exercise logic.
+     *
+     * @param order       The order, as a list of string with format '<quantity> <flower_core>'
+     *                    (as required by the exercise)
+     * @param onlyBundles As the requirements don't specify what is the expected behaviour in the case the input doesn't matches
+     *                    with the bundles sizes, I added this field to control two different behaviours
+     * @return the final order
+     */
+    public List<OrderResponse> makeOrder(List<String> order, boolean onlyBundles) {
         // Normalize input, to simplify bundle estimation
-        List<OrderDetails> normalizedDetails = normalizeInput(order.getDetails());
+        List<OrderDetails> normalizedDetails = normalizeInput(Mapper.parseRequest(order));
 
         // Retrieves all required bundles (accordingly with the input)
         Map<String, List<Bundle>> bundles = getBundlesByFlower(normalizedDetails);
@@ -54,7 +65,7 @@ public class FlowerShopService {
         OrderResponse order = new OrderResponse(detail.getAmount(), detail.getFlowerCode(), 0.0, new ArrayList<>());
 
         // TODO: rivedere i nomi
-        for(Bundle b : bundles) {
+        for (Bundle b : bundles) {
             if (remain >= b.getAmount()) {
                 int amount = remain / b.getAmount();
                 remain %= b.getAmount();
@@ -65,7 +76,7 @@ public class FlowerShopService {
 
         if (remain != 0) {
             String errMsg = "Sorry, your order can't be satisfy. Add another " + " flowers to your order or remove " + " to complete your order";
-            throw new  ResponseStatusException(HttpStatus.BAD_REQUEST, errMsg);
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errMsg);
         }
         return order;
     }
