@@ -23,6 +23,11 @@ public class Mapper {
 
     // -- Private methods
 
+    /**
+     * Utility class private constructor
+     *
+     * @throws IllegalAccessException if invoked
+     */
     private Mapper() throws IllegalAccessException {
         throw new IllegalAccessException("Invalid utility class constructor");
     }

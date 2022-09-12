@@ -6,11 +6,21 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
 public class MapperTest {
-    
+
+    @Test
+    @SuppressWarnings("unchecked")
+    void constructorTest() throws NoSuchMethodException {
+        Constructor<Mapper> constructor = Mapper.class.getDeclaredConstructor();
+
+        constructor.setAccessible(true);
+        Assertions.assertThrows(InvocationTargetException.class, constructor::newInstance);
+    }
+
     @Test
     void parseRequestCorrectInputTest() {
         List<String> input = new ArrayList<>();
