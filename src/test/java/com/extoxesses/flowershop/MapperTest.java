@@ -8,7 +8,10 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class MapperTest {
 
@@ -42,10 +45,31 @@ public class MapperTest {
         Assertions.assertThrows(NumberFormatException.class, () -> Mapper.parseRequest(input));
     }
 
+    @Test
+    void normalizeInputTest() {
+        List<String> order = new ArrayList<>();
+        order.add("10 R12");
+        order.add("13 T58");
+        order.add("4 T58");
+        Collection<OrderDetails> request = Mapper.parseRequest(order);
+
+        Map<String, Integer> expectedPrices = new HashMap<>();
+        expectedPrices.put("R12", 10);
+        expectedPrices.put("T58", 17);
+
+        List<OrderDetails> response = Mapper.normalizeInput(request);
+        Assertions.assertEquals(2, response.size());
+        response.forEach(r -> {
+            Integer expected = expectedPrices.get(r.getFlowerCode());
+            Assertions.assertNotNull(expected, r.getFlowerCode());
+            Assertions.assertEquals(expected, r.getQantity(), r.getFlowerCode());
+        });
+    }
+
     // -- Private method
 
     private void assertDetail(OrderDetails expected, OrderDetails row) {
-        Assertions.assertEquals(expected.getAmount(), row.getAmount());
+        Assertions.assertEquals(expected.getQantity(), row.getQantity());
         Assertions.assertEquals(expected.getFlowerCode(), row.getFlowerCode());
     }
 

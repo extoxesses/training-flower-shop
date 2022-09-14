@@ -13,7 +13,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +46,7 @@ public class FlowerShopService {
      */
     public List<OrderResponse> makeOrder(List<String> order, boolean onlyBundles) {
         // Normalize input, to simplify bundle estimation
-        List<OrderDetails> normalizedDetails = normalizeInput(Mapper.parseRequest(order));
+        List<OrderDetails> normalizedDetails = Mapper.normalizeInput(Mapper.parseRequest(order));
 
         // Retrieves all required bundles (accordingly with the input)
         Map<String, List<Bundle>> bundles = getBundlesByFlower(normalizedDetails);
@@ -59,12 +58,12 @@ public class FlowerShopService {
                 throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flower " + detail.getFlowerCode() + "not found");
             }
 
-            List<OrderResponseDetails> responseDetails = computeBundles(detail.getAmount(), flowerBundles);
+            List<OrderResponseDetails> responseDetails = computeBundles(detail.getQantity(), flowerBundles);
             double price = responseDetails.stream()
                     .map(rd -> rd.getQuantity() * rd.getPrice())
                     .reduce((a, b) -> a + b)
                     .orElse(0.0);
-            response.add(new OrderResponse(detail.getAmount(), detail.getFlowerCode(), price, responseDetails));
+            response.add(new OrderResponse(detail.getQantity(), detail.getFlowerCode(), price, responseDetails));
         }
         return response;
     }
@@ -118,37 +117,6 @@ public class FlowerShopService {
         bundles.values().forEach(b -> Collections.sort(b, Collections.reverseOrder()));
 
         return bundles;
-    }
-
-    /**
-     * This method was created to "normalize" the input:
-     * requirements not specify if is possible to have many rows per flower
-     *
-     * @param details Order details
-     * @return the normalized list of flower
-     */
-    private List<OrderDetails> normalizeInput(Collection<OrderDetails> details) {
-        return details.stream()
-                .collect(Collectors.groupingBy(d -> d.getFlowerCode()))
-                .values()
-                .stream()
-                .map(this::reduceCallback)
-                .filter(Objects::nonNull)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Callback to reduce the list of request details into a single object
-     *
-     * @param details List of details related to the same flower
-     * @return the reduced detail
-     */
-    private OrderDetails reduceCallback(List<OrderDetails> details) {
-        return details.stream()
-                .reduce((a, b) -> {
-                    a.setAmount(a.getAmount() + b.getAmount());
-                    return a;
-                }).get();
     }
 
 }

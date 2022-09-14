@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +24,7 @@ import java.util.Map;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
 public class FlowerShopServiceTest {
 
     @SpyBean

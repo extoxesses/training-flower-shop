@@ -6,20 +6,20 @@ public class OrderDetails implements Serializable {
 
     private static final long serialVersionUID = -7809508104543339978L;
 
-    private int amount;
+    private int qantity;
     private String flowerCode;
 
     public OrderDetails(int amount, String flowerCode) {
-        this.amount = amount;
+        this.qantity = amount;
         this.flowerCode = flowerCode;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getQantity() {
+        return qantity;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setQantity(int qantity) {
+        this.qantity = qantity;
     }
 
     public String getFlowerCode() {

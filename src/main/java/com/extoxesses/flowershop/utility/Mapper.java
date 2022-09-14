@@ -3,7 +3,10 @@ package com.extoxesses.flowershop.utility;
 import com.extoxesses.flowershop.dto.OrderDetails;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Mapper {
 
@@ -21,6 +24,23 @@ public class Mapper {
         return orderDetails;
     }
 
+    /**
+     * This method was created to "normalize" the input:
+     * requirements not specify if is possible to have many rows per flower
+     *
+     * @param details Order details
+     * @return the normalized list of flower
+     */
+    public static List<OrderDetails> normalizeInput(Collection<OrderDetails> details) {
+        return details.stream()
+                .collect(Collectors.groupingBy(d -> d.getFlowerCode()))
+                .values()
+                .stream()
+                .map(Mapper::reduceCallback)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+    }
+
     // -- Private methods
 
     /**
@@ -30,6 +50,20 @@ public class Mapper {
      */
     private Mapper() throws IllegalAccessException {
         throw new IllegalAccessException("Invalid utility class constructor");
+    }
+
+    /**
+     * Callback to reduce the list of request details into a single object
+     *
+     * @param details List of details related to the same flower
+     * @return the reduced detail
+     */
+    private static OrderDetails reduceCallback(List<OrderDetails> details) {
+        return details.stream()
+                .reduce((a, b) -> {
+                    a.setQantity(a.getQantity() + b.getQantity());
+                    return a;
+                }).get();
     }
 
     /**
