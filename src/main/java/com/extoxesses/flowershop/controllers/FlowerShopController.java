@@ -29,7 +29,7 @@ public class FlowerShopController {
 
     @PostMapping
     public ResponseEntity<List<OrderResponse>> makeOrder(@RequestBody List<String> order) {
-        List<OrderResponse> response = shopService.makeOrder(order, true);
+        List<OrderResponse> response = shopService.makeOrder(order);
         return ResponseEntity.ok(response);
     }
 

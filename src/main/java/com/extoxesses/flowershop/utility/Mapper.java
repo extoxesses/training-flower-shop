@@ -61,7 +61,7 @@ public class Mapper {
     private static OrderDetails reduceCallback(List<OrderDetails> details) {
         return details.stream()
                 .reduce((a, b) -> {
-                    a.setQantity(a.getQantity() + b.getQantity());
+                    a.setQuantity(a.getQuantity() + b.getQuantity());
                     return a;
                 }).get();
     }

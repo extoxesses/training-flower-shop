@@ -38,38 +38,64 @@ public class FlowerShopService {
     /**
      * Method that implements the exercise logic.
      *
-     * @param order       The order, as a list of string with format '<quantity> <flower_core>'
-     *                    (as required by the exercise)
-     * @param onlyBundles As the requirements don't specify what is the expected behaviour in the case the input doesn't matches
-     *                    with the bundles sizes, I added this field to control two different behaviours
+     * @param order The order, as a list of string with format '<quantity> <flower_core>'
+     *              (as required by the exercise)
      * @return the final order
      */
-    public List<OrderResponse> makeOrder(List<String> order, boolean onlyBundles) {
-        // Normalize input, to simplify bundle estimation
+    public List<OrderResponse> makeOrder(List<String> order) {
+        // In the requirements there isn't any information about orders with multiple request of the same flower.
+        // I supposed to "normalize" the input in order to optimize the bundles
         List<OrderDetails> normalizedDetails = Mapper.normalizeInput(Mapper.parseRequest(order));
 
         // Retrieves all required bundles (accordingly with the input)
         Map<String, List<Bundle>> bundles = getBundlesByFlower(normalizedDetails);
 
-        List<OrderResponse> response = new ArrayList<>();
-        for (OrderDetails detail : normalizedDetails) {
-            List<Bundle> flowerBundles = bundles.get(detail.getFlowerCode());
-            if (Objects.isNull(flowerBundles)) {
-                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flower " + detail.getFlowerCode() + "not found");
-            }
-
-            List<OrderResponseDetails> responseDetails = computeBundles(detail.getQantity(), flowerBundles);
-            double price = responseDetails.stream()
-                    .map(rd -> rd.getQuantity() * rd.getPrice())
-                    .reduce((a, b) -> a + b)
-                    .orElse(0.0);
-            response.add(new OrderResponse(detail.getQantity(), detail.getFlowerCode(), price, responseDetails));
+        // Invoke method that implements the real business logic
+        List<OrderResponse> response = makeOrder(normalizedDetails, bundles);
+        if (response.isEmpty() || response.get(0).getDetails().isEmpty()) {
+            // Since, there aren't any requirements that specify what to do if is impossible to estimate a minimum order
+            // I throw an exception. However, this not affect the algorithm that compute the order itself
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to compute bundle");
         }
+
         return response;
     }
 
     // -- Private methods
 
+    /**
+     * Business logic to resolve the exercise
+     *
+     * @param details Order details
+     * @param bundles Bundles lookup matrix
+     * @return the final order
+     */
+    private List<OrderResponse> makeOrder(List<OrderDetails> details, Map<String, List<Bundle>> bundles) {
+        List<OrderResponse> response = new ArrayList<>();
+        for (OrderDetails detail : details) {
+            List<Bundle> flowerBundles = bundles.get(detail.getFlowerCode());
+            if (Objects.isNull(flowerBundles)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flower " + detail.getFlowerCode() + "not found");
+            }
+
+            List<OrderResponseDetails> responseDetails = computeBundles(detail.getQuantity(), flowerBundles);
+            double price = responseDetails.stream()
+                    .map(rd -> rd.getQuantity() * rd.getPrice())
+                    .reduce(Double::sum)
+                    .orElse(0.0);
+            response.add(new OrderResponse(detail.getQuantity(), detail.getFlowerCode(), price, responseDetails));
+        }
+
+        return response;
+    }
+
+    /**
+     * makeOrder recursive component
+     *
+     * @param size    Order size
+     * @param bundles Available bundles
+     * @return the estimated order
+     */
     private List<OrderResponseDetails> computeBundles(int size, List<Bundle> bundles) {
         if (bundles.size() == 0) {
             // If there aren't any bundles, any check is required
@@ -105,18 +131,21 @@ public class FlowerShopService {
         return winnerBundles;
     }
 
+    /**
+     * Retrieves the bundle lookup matrix
+     *
+     * @param details Order details
+     * @return the bundle lookup matrix, with flower_code as key
+     */
     private Map<String, List<Bundle>> getBundlesByFlower(List<OrderDetails> details) {
         List<String> requiredFlowers = details.stream()
                 .map(OrderDetails::getFlowerCode)
                 .collect(Collectors.toList());
 
-        Map<String, List<Bundle>> bundles = flowerRepository.findAllByCodeIn(requiredFlowers)
+        return flowerRepository.findAllByCodeIn(requiredFlowers)
                 .stream()
+                .peek(b -> b.getBundles().sort(Collections.reverseOrder()))
                 .collect(Collectors.toMap(Flower::getCode, Flower::getBundles));
-
-        bundles.values().forEach(b -> Collections.sort(b, Collections.reverseOrder()));
-
-        return bundles;
     }
 
 }

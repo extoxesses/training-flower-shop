@@ -62,14 +62,14 @@ public class MapperTest {
         response.forEach(r -> {
             Integer expected = expectedPrices.get(r.getFlowerCode());
             Assertions.assertNotNull(expected, r.getFlowerCode());
-            Assertions.assertEquals(expected, r.getQantity(), r.getFlowerCode());
+            Assertions.assertEquals(expected, r.getQuantity(), r.getFlowerCode());
         });
     }
 
     // -- Private method
 
     private void assertDetail(OrderDetails expected, OrderDetails row) {
-        Assertions.assertEquals(expected.getQantity(), row.getQantity());
+        Assertions.assertEquals(expected.getQuantity(), row.getQuantity());
         Assertions.assertEquals(expected.getFlowerCode(), row.getFlowerCode());
     }
 
