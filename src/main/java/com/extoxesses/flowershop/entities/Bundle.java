@@ -4,7 +4,6 @@ import com.extoxesses.flowershop.entities.keys.BundlePrimaryKey;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Objects;
 
 @Entity
@@ -17,8 +16,8 @@ public class Bundle implements Comparable<Bundle>, Serializable {
     @Id
     private String flowerCode;
     @Id
-    @Column(name = "amount")
-    private int amount;
+    @Column(name = "size")
+    private int size;
     @Column(name = "price")
     private int price;
 
@@ -30,12 +29,12 @@ public class Bundle implements Comparable<Bundle>, Serializable {
         this.flowerCode = flowerCode;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getSize() {
+        return size;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public int getPrice() {
@@ -48,7 +47,7 @@ public class Bundle implements Comparable<Bundle>, Serializable {
 
     @Override
     public int compareTo(Bundle that) {
-        return this.getAmount() - that.getAmount();
+        return this.getSize() - that.getSize();
     }
 
     @Override
@@ -60,12 +59,12 @@ public class Bundle implements Comparable<Bundle>, Serializable {
         }
 
         Bundle bundle = (Bundle) o;
-        return amount == bundle.amount && Objects.equals(flowerCode, bundle.flowerCode);
+        return size == bundle.size && Objects.equals(flowerCode, bundle.flowerCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(flowerCode, amount);
+        return Objects.hash(flowerCode, size);
     }
 
 }

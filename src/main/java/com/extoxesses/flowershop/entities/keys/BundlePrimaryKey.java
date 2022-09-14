@@ -8,7 +8,7 @@ public class BundlePrimaryKey implements Serializable {
     private static final long serialVersionUID = -1012233070589337389L;
 
     private String flowerCode;
-    private int amount;
+    private int size;
 
     public String getFlowerCode() {
         return flowerCode;
@@ -18,12 +18,12 @@ public class BundlePrimaryKey implements Serializable {
         this.flowerCode = flowerCode;
     }
 
-    public int getAmount() {
-        return amount;
+    public int getSize() {
+        return size;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public void setSize(int size) {
+        this.size = size;
     }
 
     @Override
@@ -35,12 +35,12 @@ public class BundlePrimaryKey implements Serializable {
         }
 
         BundlePrimaryKey that = (BundlePrimaryKey) o;
-        return amount == that.amount && Objects.equals(flowerCode, that.flowerCode);
+        return size == that.size && Objects.equals(flowerCode, that.flowerCode);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(flowerCode, amount);
+        return Objects.hash(flowerCode, size);
     }
 
 }

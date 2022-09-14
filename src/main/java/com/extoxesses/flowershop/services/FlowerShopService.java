@@ -52,33 +52,58 @@ public class FlowerShopService {
         // Retrieves all required bundles (accordingly with the input)
         Map<String, List<Bundle>> bundles = getBundlesByFlower(normalizedDetails);
 
-        // Estimate the final bundles
-        return normalizedDetails.stream()
-                .map(detail -> computeBundles(detail, bundles.get(detail.getFlowerCode())))
-                .collect(Collectors.toList());
+        List<OrderResponse> response = new ArrayList<>();
+        for (OrderDetails detail : normalizedDetails) {
+            List<Bundle> flowerBundles = bundles.get(detail.getFlowerCode());
+            if (Objects.isNull(flowerBundles)) {
+                throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Flower " + detail.getFlowerCode() + "not found");
+            }
+
+            List<OrderResponseDetails> responseDetails = computeBundles(detail.getAmount(), flowerBundles);
+            double price = responseDetails.stream()
+                    .map(rd -> rd.getQuantity() * rd.getPrice())
+                    .reduce((a, b) -> a + b)
+                    .orElse(0.0);
+            response.add(new OrderResponse(detail.getAmount(), detail.getFlowerCode(), price, responseDetails));
+        }
+        return response;
     }
 
     // -- Private methods
-//
-    private OrderResponse computeBundles(OrderDetails detail, List<Bundle> bundles) {
-        int remain = detail.getAmount();
-        OrderResponse order = new OrderResponse(detail.getAmount(), detail.getFlowerCode(), 0.0, new ArrayList<>());
 
-        // TODO: rivedere i nomi
-        for (Bundle b : bundles) {
-            if (remain >= b.getAmount()) {
-                int amount = remain / b.getAmount();
-                remain %= b.getAmount();
-                order.getDetails().add(new OrderResponseDetails(amount, b.getAmount(), b.getPrice() / 100.0));
-                order.setPrice(order.getPrice() + (amount * b.getPrice() / 100.0));
+    private List<OrderResponseDetails> computeBundles(int size, List<Bundle> bundles) {
+        if (bundles.size() == 0) {
+            // If there aren't any bundles, any check is required
+            return Collections.emptyList();
+        }
+
+        List<OrderResponseDetails> winnerBundles = new ArrayList<>();
+        for (int i = 0; i < bundles.size(); ++i) {
+            Bundle bundle = bundles.get(i);
+            if (size < bundle.getSize()) {
+                // If bundle size is higher than size, ignore that bundle
+                continue;
+            }
+
+            int quantity = size / bundle.getSize();
+            int remains = size % bundle.getSize();
+            OrderResponseDetails ord = new OrderResponseDetails(quantity, bundle);
+
+            if (remains == 0) {
+                // In this case, we have found the last bundle
+                return Collections.singletonList(ord);
+            } else {
+                // Otherwise, continue with the analysis, and save bundles only if we found the correct distribution
+                List<OrderResponseDetails> e = computeBundles(remains, bundles.subList(i + 1, bundles.size()));
+                if (!e.isEmpty()) {
+                    winnerBundles.addAll(e);
+                    winnerBundles.add(ord);
+                    break;
+                }
             }
         }
 
-        if (remain != 0) {
-            String errMsg = "Sorry, your order can't be satisfy. Add another " + " flowers to your order or remove " + " to complete your order";
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, errMsg);
-        }
-        return order;
+        return winnerBundles;
     }
 
     private Map<String, List<Bundle>> getBundlesByFlower(List<OrderDetails> details) {

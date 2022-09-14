@@ -17,7 +17,9 @@ import org.springframework.boot.test.mock.mockito.SpyBean;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @SpringBootTest
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -36,9 +38,18 @@ public class FlowerShopServiceTest {
         request.add("10 R12");
         request.add("15 L09");
         request.add("13 T58");
+        Map<String, Integer> expectedPrices = new HashMap<>();
+        expectedPrices.put("R12", 1299);
+        expectedPrices.put("L09", 4190);
+        expectedPrices.put("T58", 2585);
 
         List<OrderResponse> response = flowerService.makeOrder(request, true);
         Assertions.assertEquals(3, response.size());
+        response.forEach(r -> {
+            Integer expected = expectedPrices.get(r.getFlowerCode());
+            Assertions.assertNotNull(expected, r.getFlowerCode());
+            Assertions.assertEquals(expected, (int) (r.getPrice() * 100), r.getFlowerCode());
+        });
     }
 
     @Test

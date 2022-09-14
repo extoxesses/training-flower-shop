@@ -1,39 +1,47 @@
 package com.extoxesses.flowershop.dto;
 
+import com.extoxesses.flowershop.entities.Bundle;
+
 import java.io.Serializable;
 
 public class OrderResponseDetails implements Serializable {
 
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 4946347329643186529L;
 
-    private int amount;
-    private int boundleSize;
+    private int quantity;
+    private int size;
     private double price;
 
     public OrderResponseDetails() {
         super();
     }
 
-    public OrderResponseDetails(int amount, int boundleSize, double price) {
-        this.amount = amount;
-        this.boundleSize = boundleSize;
+    public OrderResponseDetails(int amount, int size, double price) {
+        this.quantity = amount;
+        this.size = size;
         this.price = price;
     }
 
-    public int getAmount() {
-        return amount;
+    public OrderResponseDetails(int amount, Bundle bundle) {
+        this.quantity = amount;
+        this.size = bundle.getSize();
+        this.price = bundle.getPrice() / 100.0;
     }
 
-    public void setAmount(int amount) {
-        this.amount = amount;
+    public int getQuantity() {
+        return quantity;
     }
 
-    public int getBoundleSize() {
-        return boundleSize;
+    public void setQuantity(int quantity) {
+        this.quantity = quantity;
     }
 
-    public void setBoundleSize(int boundleSize) {
-        this.boundleSize = boundleSize;
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
 
     public double getPrice() {

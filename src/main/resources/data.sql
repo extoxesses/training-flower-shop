@@ -5,7 +5,7 @@ INSERT INTO flower (code, name) VALUES
     ('L09', 'Lilies'),
     ('T58', 'Tulips');
 
-INSERT INTO bundle (flower_code, amount, price) VALUES
+INSERT INTO bundle (flower_code, size, price) VALUES
     ('R12', 5, 699),
     ('R12', 10, 1299),
     ('L09', 3, 995),
