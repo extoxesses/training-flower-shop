@@ -19,7 +19,6 @@ public class Flower implements Serializable {
     private String code;
     @NonNull
     private String name;
-    private Integer price;
     @OneToMany(mappedBy = "flowerCode", fetch = FetchType.LAZY)
     List<Bundle> bundles;
 
@@ -37,14 +36,6 @@ public class Flower implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Integer getPrice() {
-        return price;
-    }
-
-    public void setPrice(Integer price) {
-        this.price = price;
     }
 
     public List<Bundle> getBundles() {

@@ -1,0 +1,44 @@
+@startuml
+
+  package Entities <<Rectangle>> {
+    class Flower {
+      - String code
+      --
+      - String name
+    }
+
+    class Bundle {
+      - String flowerCode
+      - int size
+      --
+      - int price
+    }
+
+    Flower "1" *-- "many" Bundle
+  }
+
+  package DTOs <<Rectangle>> {
+    class OrderDetails {
+      - int quantity
+      - String flowerCode
+    }
+
+    class OrderResponse {
+      - int totalAmount
+      - String flowerCode
+      - double price
+      - OrderResponseDetails[] details
+    }
+
+    class OrderResponseDetails  {
+      - int quantity
+      - int size
+      - double price
+    }
+
+    OrderResponse -down-o OrderResponseDetails
+  }
+
+  Flower -left-* OrderDetails
+
+@enduml

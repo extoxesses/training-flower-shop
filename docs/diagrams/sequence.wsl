@@ -1,0 +1,20 @@
+@startuml
+
+participant controller as ctrl
+participant service    as srv
+participant repository as repo
+database    database   as db
+
+     -->o ctrl : Send order
+ctrl ->   srv
+srv  ->   repo : Get flowers by code
+  activate repo
+    repo <--> db   : SELECT * FROM ...
+    srv  <-   repo : Flowers
+  deactivate repo
+
+srv  ->   srv  : Do logic
+ctrl <-   srv  : Response
+     <--  ctrl
+
+@enduml
